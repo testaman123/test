@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Facebook Leads And Salesforce Connector</title>
+  </head>
+  <body>
+    <h2>Facebook Leads And Salesforce Connector</h2>
+    <script>
+      window.fbAsyncInit = function () {
+        FB.init({
+          appId: "838328337344625",
+          autoLogAppEvents: true,
+          xfbml: true,
+          version: "v15.0",
+        });
+      };
+      function myFacebookLogin() {
+        FB.login(
+          function (response) {
+            console.log(response);
+          },
+          {
+            scope:
+              "pages_show_list,ads_management,ads_read,leads_retrieval,pages_read_engagement,pages_manage_metadata,pages_manage_ads",
+          }
+        );
+      }
+    </script>
+    <script
+      async
+      defer
+      crossorigin="anonymous"
+      src="https://connect.facebook.net/en_US/sdk.js"
+    ></script>
+    <button onclick="myFacebookLogin()">Login with Facebook</button>
+  </body>
+</html>

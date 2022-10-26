@@ -1,12 +1,16 @@
 var express = require("express");
 const axios = require("axios");
 var app = express();
+const path = require("path");
 app.use(express.json());
 require("dotenv").config();
 const PORT = process.env.PORT;
 // Enter the Page Access Token from the previous step
 const FACEBOOK_PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
 
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname + "/html_pages/loginToFacebook.html"));
+});
 // GET /webhook
 app.get("/webhook", (req, res) => {
   // Facebook sends a GET request
