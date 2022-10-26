@@ -7,8 +7,8 @@ const PORT = process.env.PORT;
 app.get("/", (req, res) => {
   res.send("App is working fine.");
 });
-app.post("/webhook", function (req, res) {
-  res.send(req.body);
+app.get("/webhook", function (req, res) {
+  res.send(req.query);
 });
 
 var server = app.listen(PORT, function () {
