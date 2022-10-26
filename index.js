@@ -7,9 +7,6 @@ require("dotenv").config();
 // Enter the Page Access Token from the previous step
 const FACEBOOK_PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
 
-// Accept JSON POST body
-app.use(bodyParser.json());
-
 // GET /webhook
 app.get("/webhook", (req, res) => {
   // Facebook sends a GET request
