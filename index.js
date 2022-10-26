@@ -11,6 +11,9 @@ const FACEBOOK_PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname + "/html_pages/loginToFacebook.html"));
 });
+app.get("/privacy-policy", (req, res) => {
+  res.sendFile(path.join(__dirname + "/html_pages/privacy-policy.html"));
+});
 // GET /webhook
 app.get("/webhook", (req, res) => {
   // Facebook sends a GET request

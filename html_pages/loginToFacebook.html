@@ -8,6 +8,12 @@
   </head>
   <body>
     <h2>Facebook Leads And Salesforce Connector</h2>
+    <script
+      async
+      defer
+      crossorigin="anonymous"
+      src="https://connect.facebook.net/en_US/sdk.js"
+    ></script>
     <script>
       window.fbAsyncInit = function () {
         FB.init({
@@ -20,7 +26,19 @@
       function myFacebookLogin() {
         FB.login(
           function (response) {
-            console.log(response);
+            console.log("Test", response, response.authResponse.userID);
+            FB.api(
+              "/" + response.authResponse.userID + "/accounts",
+              function (response) {
+                console.log(response);
+                var pages = response.data;
+                pages.forEach((page) => {
+                  var li = document.createElement("li");
+                  li.innerHTML = page.name;
+                  document.getElementById("list").appendChild(li);
+                });
+              }
+            );
           },
           {
             scope:
@@ -29,12 +47,7 @@
         );
       }
     </script>
-    <script
-      async
-      defer
-      crossorigin="anonymous"
-      src="https://connect.facebook.net/en_US/sdk.js"
-    ></script>
     <button onclick="myFacebookLogin()">Login with Facebook</button>
+    <ul id="list"></ul>
   </body>
 </html>
