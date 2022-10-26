@@ -3,7 +3,7 @@ const axios = require("axios");
 var app = express();
 app.use(express.json());
 require("dotenv").config();
-
+const PORT = process.env.PORT;
 // Enter the Page Access Token from the previous step
 const FACEBOOK_PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
 
