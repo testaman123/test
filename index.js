@@ -4,7 +4,9 @@ app.use(express.json());
 require("dotenv").config();
 
 const PORT = process.env.PORT;
-
+app.get("/", (req, res) => {
+  res.send("App is working fine.");
+});
 app.post("/", function (req, res) {
   res.send(req.body);
 });
