@@ -37,6 +37,7 @@ app.post("/webhook", async (req, res) => {
   for (const entry of req.body.entry) {
     for (const change of entry.changes) {
       // Process new lead (leadgen_id)
+      console.log(change);
       await processNewLead(change.value.leadgen_id);
     }
   }

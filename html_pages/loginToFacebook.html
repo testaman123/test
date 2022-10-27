@@ -23,6 +23,9 @@
           version: "v15.0",
         });
       };
+      function subscribeApp(page_id, page_access_token) {
+        console.log("Subscribing page to app", page_id);
+      }
       function myFacebookLogin() {
         FB.login(
           function (response) {
@@ -34,7 +37,17 @@
                 var pages = response.data;
                 pages.forEach((page) => {
                   var li = document.createElement("li");
-                  li.innerHTML = page.name;
+                  var a = document.createElement("a");
+                  a.href = "#";
+                  a.onclick = subscribeApp.bind(
+                    this,
+                    page.id,
+                    page.access_token
+                  );
+                  a.innerHTML = page.name;
+                  li.appendChild(a);
+                  document.getElementById("list").innerHTML =
+                    "If App got removed from the page then you can click on the below page name to get app installed on the required page.";
                   document.getElementById("list").appendChild(li);
                 });
               }
@@ -48,6 +61,7 @@
       }
     </script>
     <button onclick="myFacebookLogin()">Login with Facebook</button>
+
     <ul id="list"></ul>
   </body>
 </html>
