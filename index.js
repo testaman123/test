@@ -5,15 +5,49 @@ const path = require("path");
 app.use(express.json());
 require("dotenv").config();
 const PORT = process.env.PORT;
+const SalesForceAPI = require("./Services/SalesForceAPI");
 // Enter the Page Access Token from the previous step
-const FACEBOOK_PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+let FACEBOOK_PAGE_ACCESS_TOKEN = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+let pageTokenObject = {};
+
+//Facebook Login Page to generate access token and grant page access
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname + "/html_pages/loginToFacebook.html"));
 });
+
+//Privacy Policy page
+
 app.get("/privacy-policy", (req, res) => {
   res.sendFile(path.join(__dirname + "/html_pages/privacy-policy.html"));
 });
+
+// Api to generate Facebook Page access token that never expires
+
+app.post("/generateLongLivePageAccessToken", async (req, res) => {
+  console.log(req.body);
+  //generate long live user access token
+  try {
+    let { data: userTokendata } = await axios.get(
+      process.env.FACEBOKK_GRAPH_API_URL +
+        `/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.FACEBOKK_APP_ID}&client_secret=${process.env.FACEBOKK_APP_SECRET}&fb_exchange_token=${req.body.access_token}`
+    );
+    console.log(userTokendata);
+    let { data: pageTokendata } = await axios.get(
+      process.env.FACEBOKK_GRAPH_API_URL +
+        `/${req.body.app_user_id}/accounts?access_token=${userTokendata.access_token}`
+    );
+    pageTokendata.data.forEach((singlePage) => {
+      pageTokenObject[singlePage.id] = singlePage.access_token;
+    });
+    console.log(pageTokenObject);
+    res.send({ message: "Page Token Generated Successfully." });
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
 // GET /webhook
 app.get("/webhook", (req, res) => {
   // Facebook sends a GET request
@@ -38,7 +72,7 @@ app.post("/webhook", async (req, res) => {
     for (const change of entry.changes) {
       // Process new lead (leadgen_id)
       console.log(change);
-      await processNewLead(change.value.leadgen_id);
+      await processNewLead(change.value.leadgen_id, change.value.page_id);
     }
   }
 
@@ -51,13 +85,13 @@ app.listen(PORT, () => {
 });
 
 // Process incoming leads
-async function processNewLead(leadId) {
+async function processNewLead(leadId, pageId) {
   let response;
 
   try {
     // Get lead details by lead ID from Facebook API
     response = await axios.get(
-      `https://graph.facebook.com/v9.0/${leadId}/?access_token=${FACEBOOK_PAGE_ACCESS_TOKEN}`
+      `${process.env.FACEBOKK_GRAPH_API_URL}/${leadId}/?access_token=${pageTokenObject[pageId]}`
     );
   } catch (err) {
     // Log errors
@@ -79,15 +113,53 @@ async function processNewLead(leadId) {
 
   // Lead fields
   const leadForm = [];
+  leadObject = {};
 
   // Extract fields
+  let emailPattern = /mail/gi;
+  let phonePattern = /phone/gi;
+  let mobilePattern = /mobile/gi;
+  let fullnamePattern1 = /full name/gi;
+  let fullnamePattern2 = /fullname/gi;
+  let firstnamePattern1 = /first name/gi;
+  let firstnamePattern2 = /firstname/gi;
+  let lastnamePattern1 = /last name/gi;
+  let lastnamePattern2 = /lastname/gi;
   for (const field of response.data.field_data) {
     // Get field name & value
     const fieldName = field.name;
     const fieldValue = field.values[0];
 
     // Store in lead array
-    leadForm.push(`${fieldName}: ${fieldValue}`);
+
+    if (emailPattern.test(fieldName)) {
+      leadObject.Email = fieldValue;
+    }
+    if (phonePattern.test(fieldName) || mobilePattern.test(fieldName)) {
+      leadObject.Phone = fieldValue;
+    }
+    if (fullnamePattern1.test(fieldName) || fullnamePattern2.test(fieldName)) {
+      leadObject.Fullname = fieldValue;
+    }
+    if (
+      firstnamePattern1.test(fieldName) ||
+      firstnamePattern2.test(fieldName)
+    ) {
+      leadObject.Firstname = fieldValue;
+    }
+    if (lastnamePattern1.test(fieldName) || lastnamePattern2.test(fieldName)) {
+      leadObject.Lastname = fieldValue;
+    }
+  }
+  leadForm.push(leadObject);
+  let object = new SalesForceAPI();
+  await object.init();
+  if (leadForm.length) {
+    var pushedResponse = await object.putDataExtension(
+      "50D4FF24-4E44-4222-BD2F-51CFB34F9EF3",
+      leadForm
+    );
+    console.log(pushedResponse);
   }
 
   // Implode into string with newlines in between fields

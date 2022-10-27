@@ -8,6 +8,16 @@
   </head>
   <body>
     <h2>Facebook Leads And Salesforce Connector</h2>
+    <p>
+      Just Sign in with facebook to generate the Page Access Token that never
+      expires.
+    </p>
+    <b
+      >Note: There is no need to click on page if your motive was to generate
+      access token.</b
+    >
+    <br />
+    <br />
     <script
       async
       defer
@@ -17,7 +27,7 @@
     <script>
       window.fbAsyncInit = function () {
         FB.init({
-          appId: "838328337344625",
+          appId: "665207841617994",
           autoLogAppEvents: true,
           xfbml: true,
           version: "v15.0",
@@ -25,11 +35,40 @@
       };
       function subscribeApp(page_id, page_access_token) {
         console.log("Subscribing page to app", page_id);
+        FB.api(
+          "/" + page_id + "/subscribed_apps",
+          "post",
+          { access_token: page_access_token, subscribed_fields: "leadgen" },
+          function (response) {
+            console.log("Successfully subscribed page", response);
+          }
+        );
       }
+      function generatePageAccessToken(access_token, app_user_id) {
+        const post_data = { access_token, app_user_id };
+
+        fetch("/generateLongLivePageAccessToken", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(post_data),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log(data))
+          .catch((err) => console.log(err));
+      }
+
       function myFacebookLogin() {
         FB.login(
           function (response) {
             console.log("Test", response, response.authResponse.userID);
+            generatePageAccessToken(
+              response.authResponse.accessToken,
+              response.authResponse.userID
+            );
+            document.getElementById("list").innerHTML =
+              "If App got removed from the page then you can click on the below page name to get app installed on the required page.";
             FB.api(
               "/" + response.authResponse.userID + "/accounts",
               function (response) {
@@ -46,8 +85,7 @@
                   );
                   a.innerHTML = page.name;
                   li.appendChild(a);
-                  document.getElementById("list").innerHTML =
-                    "If App got removed from the page then you can click on the below page name to get app installed on the required page.";
+
                   document.getElementById("list").appendChild(li);
                 });
               }
