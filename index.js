@@ -113,7 +113,7 @@ async function processNewLead(leadId, pageId) {
 
   // Lead fields
   const leadForm = [];
-  leadObject = {};
+  let leadObject = {};
 
   // Extract fields
   let emailPattern = /mail/gi;
@@ -163,10 +163,10 @@ async function processNewLead(leadId, pageId) {
   }
 
   // Implode into string with newlines in between fields
-  const leadInfo = leadForm.join("\n");
+  // const leadInfo = leadForm.join("\n");
 
   // Log to console
-  console.log("A new lead was received!\n", leadInfo);
+  console.log("A new lead was received!\n", leadObject);
 
   // Use a library like "nodemailer" to notify you about the new lead
   //
