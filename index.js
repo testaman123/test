@@ -69,7 +69,8 @@ app.post("/webhook", async (req, res) => {
   if (!req.body.entry) {
     return res.status(500).send({ error: "Invalid POST data received" });
   }
-
+  // Success
+  res.send({ success: true });
   // Travere entries & changes and process lead IDs
   for (const entry of req.body.entry) {
     for (const change of entry.changes) {
@@ -78,9 +79,6 @@ app.post("/webhook", async (req, res) => {
       await processNewLead(change.value.leadgen_id, change.value.page_id);
     }
   }
-
-  // Success
-  res.send({ success: true });
 });
 
 app.listen(PORT, () => {
