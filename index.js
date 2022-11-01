@@ -16,6 +16,9 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname + "/html_pages/loginToFacebook.html"));
 });
 
+app.get("/healthz", (req, res) => {
+  res.send("App is working fine");
+});
 //Privacy Policy page
 
 app.get("/privacy-policy", (req, res) => {
